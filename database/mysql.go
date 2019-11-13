@@ -2,6 +2,8 @@ package database
 
 import (
 	"log"
+	"fmt"
+	"os"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -15,12 +17,17 @@ func Mysql() *gorm.DB {
 
 type User struct {
 	gorm.Model
-	Email string
-	Password string
+	Email 		string	`json:"email"`
+	Password 	string	`json:"password"`
 }
 
 func Initialize() {
-	uri := "root:root@/golang?charset=utf8&parseTime=True&loc=Local" // dev
+	var uri string
+	username := os.Getenv("MYSQL_USERNAME")
+	password := os.Getenv("MYSQL_PASSWORD")
+	name := os.Getenv("MYSQL_DATABASE")
+	uri = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", username, password, name)
+
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
 		log.Println("Connection to MySQL failed")
@@ -29,7 +36,6 @@ func Initialize() {
 		log.Println("Connected to MySQL")		
 	}
 	
-	defer db.Close()
 	database = db
 	
 	// Create User table.

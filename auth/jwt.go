@@ -2,6 +2,7 @@ package auth
 
 import (
 	"log"
+	"os"
 	"net/http"
 	"apathy/utils"
 	"regexp"
@@ -9,7 +10,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var secret = []byte("secret") // temp
+var secret = []byte(os.Getenv("JWT_SECRET"))
 
 type Token struct {
 	UserId uint

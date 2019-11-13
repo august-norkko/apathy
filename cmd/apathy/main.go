@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"apathy/auth"
 	"apathy/controller"
 	"apathy/database"
@@ -28,6 +29,16 @@ func main() {
 	http.ListenAndServe(":3000", router)
 }
 
+func loadEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err)
+		log.Fatal("Error loading environment file")
+	} else {
+		log.Println("Loaded environment file")
+	}
+}
+
 func initLogging() {
 	file, err := os.OpenFile("logs.log", os.O_CREATE | os.O_APPEND, 0644)
 	if err != nil {
@@ -37,4 +48,6 @@ func initLogging() {
 	mw := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(mw)
 	log.Print("Logging has begun.")
+
+	loadEnv()
 }

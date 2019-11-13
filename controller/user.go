@@ -4,6 +4,7 @@ import (
 	_ "fmt"
 	"log"
 	"time"
+	"os"
 	"encoding/json"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
@@ -12,21 +13,16 @@ import (
 	"apathy/database"
 )
 
-var secret = []byte("secret") // temp
+var secret = []byte(os.Getenv("JWT_SECRET")) // temp
 
-func decodeJson(r *http.Request) User {
+func decodeJson(r *http.Request) database.User {
+	var data database.User
 	decoder := json.NewDecoder(r.Body)
-	var data User
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return data
-}
-
-type User struct {
-	Email 		string	`json:"email"`
-	Password	string	`json:"password"`
 }
 
 type Claim struct {
@@ -42,9 +38,34 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         log.Println(err)
 	}
 
-	data = User{
-		Email:		data.Email,
-		Password:	string(hashedPassword),
+		// no validation
+	database.Mysql().Create(&database.User{ Email: data.Email, Password: string(hashedPassword) })
+
+	msg := utils.Message(http.StatusOK, "User created successfully")
+	utils.Response(w, msg)
+	return
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	data := decodeJson(r)
+	password := []byte(data.Password)
+
+	user := &database.User{}
+	db := database.Mysql()
+	err := db.Table("users").Where("email = ?", data.Email).First(user).Error
+	if err != nil {
+		log.Println(err)
+		msg := utils.Message(http.StatusForbidden, "Email not found")
+		utils.Response(w, msg)
+		return
+	}
+
+    err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
+    if err != nil {
+		log.Println(err) // no match
+		msg := utils.Message(http.StatusForbidden, "Invalid email or password")
+		utils.Response(w, msg)
+		return
 	}
 
 	expiration := time.Now().Add(10 * time.Minute)
@@ -61,32 +82,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	log.Println(signedToken)
 	msg := utils.Message(http.StatusOK, signedToken)
 	utils.Response(w, msg)
 	return
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	data := decodeJson(r)
-	password := []byte(data.Password)
-
-	// actually fetch from db
-	hashedPassword := []byte("$2a$10$Bb40xvsagDfOr6XS5V2vyOaf6.qBGToycDNisWOCiFJRUSnt9vKb.")
-	
-    err := bcrypt.CompareHashAndPassword(hashedPassword, password)
-    if err != nil {
-		log.Println(err) // no match
-		msg := utils.Message(http.StatusForbidden, "Invalid email or password")
-		utils.Response(w, msg)
-		return
-	}
-
-	msg := utils.Message(http.StatusOK, "Successful login")
-	utils.Response(w, msg)
-	return
-
-	// todo
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {

@@ -38,3 +38,6 @@
 
 # Log files
 *.log
+
+# .env file
+.env
