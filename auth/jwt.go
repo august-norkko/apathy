@@ -53,19 +53,19 @@ func Authentication(next http.Handler) http.Handler {
 
 		if err != nil {
 			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, "Invalid JWT token")
+			msg := utils.Message(http.StatusForbidden, "Unable to parse JWT token")
 			utils.Response(w, msg)
 			return
 		}
 
 		if !token.Valid {
 			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, "JWT Token Invalid")
+			msg := utils.Message(http.StatusForbidden, "Expired or Invalid JWT token")
 			utils.Response(w, msg)
 			return
 		}
 
-		// token is valid, can continue chain.
 		next.ServeHTTP(w, r)
+		return
 	})
 }

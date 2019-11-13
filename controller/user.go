@@ -6,9 +6,10 @@ import (
 	"time"
 	"encoding/json"
 	"net/http"
-	"apathy/utils"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/dgrijalva/jwt-go"
+	"apathy/utils"
+	"apathy/database"
 )
 
 var secret = []byte("secret") // temp
@@ -24,10 +25,8 @@ func decodeJson(r *http.Request) User {
 }
 
 type User struct {
-	Email 		string		`json:"email"`
-	Password 	string		`json:"password"`
-	CreatedAt 	time.Time	`json:"createdAt"`
-	UpdatedAt 	time.Time	`json:"updatedAt"`
+	Email 		string	`json:"email"`
+	Password	string	`json:"password"`
 }
 
 type Claim struct {
@@ -46,8 +45,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	data = User{
 		Email:		data.Email,
 		Password:	string(hashedPassword),
-		CreatedAt:	time.Now(),
-		UpdatedAt:	time.Now(),
 	}
 
 	expiration := time.Now().Add(10 * time.Minute)
