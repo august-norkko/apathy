@@ -4,7 +4,17 @@ import (
 	"log"
 	"net/http"
 	"apathy/utils"
+	"regexp"
+	"strings"
+	"github.com/dgrijalva/jwt-go"
 )
+
+var secret = []byte("secret") // temp
+
+type Token struct {
+	UserId uint
+	jwt.StandardClaims
+}
 
 // requests goes through this middleware
 func Authentication(next http.Handler) http.Handler {
@@ -18,17 +28,44 @@ func Authentication(next http.Handler) http.Handler {
 				return
 			}
 		}
-
-		log.Print(r.URL.Path)
-		//log.Print("Request being authenticated: ", r)
-
+		
+		// Check for empty header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			msg := utils.Message(401, "Unauthorized, missing JWT token")
+			msg := utils.Message(http.StatusForbidden, "Missing Authorization Header")
 			utils.Response(w, msg)
 			return
 		}
 
+		// Check for malformed header
+		match, _ := regexp.MatchString(`^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, authHeader)
+		if match == false {
+			msg := utils.Message(http.StatusForbidden, "Malformed Authorization Header")
+			utils.Response(w, msg)
+			return
+		}
+
+		tokenPointer, tokenPart := &Token{}, strings.Split(authHeader, " ")[1] // don't want Bearer
+		token, err := jwt.ParseWithClaims(tokenPart, tokenPointer, func(t *jwt.Token) (interface{}, error) {
+			log.Println(t)
+			return []byte(secret), nil
+		})
+
+		if err != nil {
+			log.Println(err)
+			msg := utils.Message(http.StatusForbidden, "Invalid JWT token")
+			utils.Response(w, msg)
+			return
+		}
+
+		if !token.Valid {
+			log.Println(err)
+			msg := utils.Message(http.StatusForbidden, "JWT Token Invalid")
+			utils.Response(w, msg)
+			return
+		}
+
+		// token is valid, can continue chain.
 		next.ServeHTTP(w, r)
 	})
 }

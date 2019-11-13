@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"apathy/utils"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/dgrijalva/jwt-go"
 )
+
+var secret = []byte("secret") // temp
 
 func decodeJson(r *http.Request) User {
 	decoder := json.NewDecoder(r.Body)
@@ -21,10 +24,15 @@ func decodeJson(r *http.Request) User {
 }
 
 type User struct {
-	Email string
-	Password string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Email 		string		`json:"email"`
+	Password 	string		`json:"password"`
+	CreatedAt 	time.Time	`json:"createdAt"`
+	UpdatedAt 	time.Time	`json:"updatedAt"`
+}
+
+type Claim struct {
+	Email	string	`json:"email"`
+	jwt.StandardClaims
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,16 +40,32 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	password := []byte(data.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
     if err != nil {
-        panic(err)
+        log.Println(err)
 	}
-	data.Password = string(hashedPassword)
-	data.CreatedAt = time.Now()
-	data.UpdatedAt = time.Now()
-	
-	// validation, save in db
-	log.Println(data)
 
-	msg := utils.Message(200, "Successful")
+	data = User{
+		Email:		data.Email,
+		Password:	string(hashedPassword),
+		CreatedAt:	time.Now(),
+		UpdatedAt:	time.Now(),
+	}
+
+	expiration := time.Now().Add(10 * time.Minute)
+	claim := &Claim{
+		Email: data.Email,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expiration.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	signedToken, err := token.SignedString(secret)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(signedToken)
+	msg := utils.Message(http.StatusOK, signedToken)
 	utils.Response(w, msg)
 	return
 }
@@ -56,12 +80,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     err := bcrypt.CompareHashAndPassword(hashedPassword, password)
     if err != nil {
 		log.Println(err) // no match
-		msg := utils.Message(301, "Invalid email or password")
+		msg := utils.Message(http.StatusForbidden, "Invalid email or password")
 		utils.Response(w, msg)
 		return
 	}
 
-	msg := utils.Message(200, "Successful login")
+	msg := utils.Message(http.StatusOK, "Successful login")
 	utils.Response(w, msg)
 	return
 
@@ -69,7 +93,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
-	msg := utils.Message(200, "Successful")
+	msg := utils.Message(http.StatusOK, "Successful")
 	utils.Response(w, msg)
 	return
 }
