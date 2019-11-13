@@ -11,7 +11,7 @@ func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Print("Incoming request")
 
-		allowed := []string{"/foo", "/baz", "/user/register", "user/login"}
+		allowed := []string{"/foo", "/baz", "/user/new", "/user/login"}
 		for _, current := range allowed {
 			if current == r.URL.Path {
 				next.ServeHTTP(w, r)

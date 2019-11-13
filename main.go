@@ -28,7 +28,7 @@ func main() {
 	router.HandleFunc("/health", utils.HealthcheckHandler)
 
 	router.HandleFunc("/user", controller.UserHandler).Methods("GET")
-	router.HandleFunc("/user/create", controller.RegisterHandler).Methods("POST")
+	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST")
 	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST")
 
 	router.Use(auth.Authentication)
