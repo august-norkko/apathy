@@ -2,7 +2,7 @@ package auth
 
 import (
 	"log"
-	"os"
+	_"os"
 	"net/http"
 	"apathy/utils"
 	"regexp"
@@ -10,7 +10,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var secret = []byte(os.Getenv("JWT_SECRET"))
+const (
+	secret = "secret"
+)
 
 type Token struct {
 	UserId uint
@@ -34,7 +36,7 @@ func Authentication(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			msg := utils.Message(http.StatusForbidden, "Missing Authorization Header")
-			utils.Response(w, msg)
+			utils.Respond(w, msg)
 			return
 		}
 
@@ -42,7 +44,7 @@ func Authentication(next http.Handler) http.Handler {
 		match, _ := regexp.MatchString(`^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, authHeader)
 		if match == false {
 			msg := utils.Message(http.StatusForbidden, "Malformed Authorization Header")
-			utils.Response(w, msg)
+			utils.Respond(w, msg)
 			return
 		}
 
@@ -55,14 +57,14 @@ func Authentication(next http.Handler) http.Handler {
 		if err != nil {
 			log.Println(err)
 			msg := utils.Message(http.StatusForbidden, "Unable to parse JWT token")
-			utils.Response(w, msg)
+			utils.Respond(w, msg)
 			return
 		}
 
 		if !token.Valid {
 			log.Println(err)
 			msg := utils.Message(http.StatusForbidden, "Expired or Invalid JWT token")
-			utils.Response(w, msg)
+			utils.Respond(w, msg)
 			return
 		}
 

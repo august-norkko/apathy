@@ -7,6 +7,6 @@ import (
 
 func FooHandler(w http.ResponseWriter, r *http.Request) {
 	msg := utils.Message(http.StatusOK, "Successful")
-	utils.Response(w, msg)
+	utils.Respond(w, msg)
 	return
 }

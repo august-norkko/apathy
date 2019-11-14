@@ -2,10 +2,10 @@ package database
 
 import (
 	"log"
-	"fmt"
-	"os"
-	"github.com/jinzhu/gorm"
+	_ "fmt"
+	_ "os"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 var database *gorm.DB
@@ -22,11 +22,7 @@ type User struct {
 }
 
 func Initialize() {
-	var uri string
-	username := os.Getenv("MYSQL_USERNAME")
-	password := os.Getenv("MYSQL_PASSWORD")
-	name := os.Getenv("MYSQL_DATABASE")
-	uri = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", username, password, name)
+	uri := "root:root@/golang?charset=utf8&parseTime=True&loc=Local"
 
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
@@ -36,8 +32,6 @@ func Initialize() {
 		log.Println("Connected to MySQL")		
 	}
 	
-	database = db
-	
-	// Create User table.
 	db.AutoMigrate(&User{})
+	database = db
 }
