@@ -3,16 +3,11 @@ package services
 import (
 	"log"
 	"net/http"
-	"time"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/dgrijalva/jwt-go"
 	"apathy/utils"
 	"apathy/database"
 	"apathy/entity"
-)
-
-const (
-	secret = "secret"
+	"apathy/security"
 )
 
 type IUserService interface {
@@ -64,18 +59,9 @@ func (s *Service) LoginUser(r *http.Request) (int, string, error) {
 		return http.StatusBadRequest, "Email or password incorrect", err
 	}
 
-	expiration := time.Now().Add(10 * time.Minute)
-	claim := &entity.Claim{
-		Email: res.Email,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expiration.Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	signedToken, err := token.SignedString([]byte(secret))
+	signedToken, err := security.GenerateToken(res.Email)
 	if err != nil {
-		return http.StatusBadRequest, "Unable to sign token", err
+		return http.StatusBadRequest, "Unable to generate JWT token", err
 	}
 
 	return http.StatusOK, signedToken, nil

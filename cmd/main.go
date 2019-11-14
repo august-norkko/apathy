@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv"
-	"apathy/auth"
+	"apathy/security"
 	"apathy/controller"
 	"apathy/database"
 )
@@ -25,7 +25,7 @@ func main() {
 	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST")
 	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST")
 	
-	router.Use(auth.Authentication)
+	router.Use(security.Authentication)
 	http.ListenAndServe(":3000", router)
 }
 

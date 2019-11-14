@@ -1,23 +1,14 @@
-package auth
+package security
 
 import (
 	"log"
-	_"os"
 	"net/http"
-	"apathy/utils"
 	"regexp"
 	"strings"
 	"github.com/dgrijalva/jwt-go"
+	"apathy/utils"
+	"apathy/entity"
 )
-
-const (
-	secret = "secret"
-)
-
-type Token struct {
-	UserId uint
-	jwt.StandardClaims
-}
 
 // requests goes through this middleware
 func Authentication(next http.Handler) http.Handler {
@@ -48,12 +39,7 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		tokenPointer, tokenPart := &Token{}, strings.Split(authHeader, " ")[1] // don't want Bearer
-		token, err := jwt.ParseWithClaims(tokenPart, tokenPointer, func(t *jwt.Token) (interface{}, error) {
-			log.Println(t)
-			return []byte(secret), nil
-		})
-
+		token, err := security.ParseToken(authHeader)
 		if err != nil {
 			log.Println(err)
 			msg := utils.Message(http.StatusForbidden, "Unable to parse JWT token")
