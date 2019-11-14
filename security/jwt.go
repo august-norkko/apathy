@@ -2,15 +2,14 @@ package security
 
 import (
 	"time"
+	"os"
 	"apathy/entity"
 	"github.com/dgrijalva/jwt-go"
 	_ "log"
 	"strings"
 )
 
-const (
-	secret = "secret"
-)
+var secret string = os.Getenv("JWT_SECRET")
 
 func GenerateToken(email string) (string, error) {
 	expiration := time.Now().Add(10 * time.Minute)

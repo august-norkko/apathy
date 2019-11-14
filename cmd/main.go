@@ -6,17 +6,16 @@ import (
 	"io"
 	"net/http"
 	"github.com/gorilla/mux"
-	_ "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	"apathy/security"
 	"apathy/controller"
 	"apathy/database"
 )
 
 func main() {
-	initLogging()
-	database.Initialize()
-
+	setup()
 	router := mux.NewRouter()
+
 	router.HandleFunc("/health", controller.HealthcheckHandler)
 	router.HandleFunc("/user", controller.UserHandler).Methods("POST")
 	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST")
@@ -26,25 +25,25 @@ func main() {
 	http.ListenAndServe(":3000", router)
 }
 
-/*
-func loadEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(err)
-		log.Fatal("Error loading environment file")
-	} else {
-		log.Println("Loaded environment file")
-	}
-}*/
 
-func initLogging() {
+func setup() {
 	file, err := os.OpenFile("logs.log", os.O_CREATE | os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
+
 	mw := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(mw)
 	log.Print("Logging has begun.")
 
+	err = godotenv.Load()
+	if err != nil {
+		log.Println(err)
+		log.Fatal("Error loading environment file")
+	}
+	log.Println("Loaded environment file")
+
+	database.Initialize()
+	return
 }
