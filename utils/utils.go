@@ -13,3 +13,7 @@ func Respond(w http.ResponseWriter, data map[string] interface{}) {
 func Message(status int, message string) (map[string]interface{}) {
 	return map[string]interface{} {"status": status, "message": message }
 }
+
+func GiveToken(token string) (map[string]interface{}) {
+	return map[string]interface{} {"token": token }
+}

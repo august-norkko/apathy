@@ -25,7 +25,6 @@ func main() {
 	http.ListenAndServe(":3000", router)
 }
 
-
 func setup() {
 	file, err := os.OpenFile("logs.log", os.O_CREATE | os.O_APPEND, 0644)
 	if err != nil {
@@ -38,6 +37,7 @@ func setup() {
 
 	err = godotenv.Load()
 	if err != nil {
+		log.Println(err)
 		log.Fatal("Error loading environment file")
 	}
 

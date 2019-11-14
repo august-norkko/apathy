@@ -6,6 +6,7 @@ import (
 	"os"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"apathy/entity"
 )
 
 var database *gorm.DB
@@ -14,18 +15,12 @@ func Mysql() *gorm.DB {
 	return database
 }
 
-type User struct {
-	gorm.Model
-	Email 		string	`json:"email"`
-	Password 	string	`json:"password"`
-}
-
 func Initialize() {
-	var uri string
+	var uri string = "charset=utf8&parseTime=True&loc=Local"
 	username := os.Getenv("MYSQL_USERNAME")
 	password := os.Getenv("MYSQL_PASSWORD")
 	name := os.Getenv("MYSQL_DATABASE")
-	uri = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", username, password, name)
+	uri = fmt.Sprintf("%s:%s@/%s?%s", username, password, name, uri)
 
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
@@ -34,6 +29,6 @@ func Initialize() {
 	}
 	log.Println("Connected to MySQL")
 	
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&entity.User{})
 	database = db
 }

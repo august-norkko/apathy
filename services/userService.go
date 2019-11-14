@@ -12,7 +12,7 @@ import (
 
 type IUserService interface {
 	CreateUser(r *http.Request) (int, string, error)
-	LoginUser(r *http.Request) (int, string, error)
+	LoginUser(r *http.Request) (string, error)
 }
 
 type Service struct {}
@@ -43,27 +43,27 @@ func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	return http.StatusOK, "User created successfully", nil
 }
 
-func (s *Service) LoginUser(r *http.Request) (int, string, error) {
+func (s *Service) LoginUser(r *http.Request) (string, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
-		return http.StatusBadRequest, "Unable to decode JSON", err
+		return "", err
 	}
 
 	db, user, password := database.Mysql(), &entity.User{}, []byte(res.Password)
 	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
 	if err != nil {
-		return http.StatusBadRequest, "Email not found", err
+		return "", err
 	}
 
     err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
     if err != nil {
-		return http.StatusBadRequest, "Email or password incorrect", err
+		return "", err
 	}
 
 	signedToken, err := security.GenerateToken(res.Email)
 	if err != nil {
-		return http.StatusBadRequest, "Unable to generate JWT token", err
+		return "", err
 	}
 
-	return http.StatusOK, signedToken, nil
+	return signedToken, nil
 }

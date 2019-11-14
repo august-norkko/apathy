@@ -18,12 +18,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	status, msg, err := services.UserService().LoginUser(r)
-	if err != nil {
+	token, err := services.UserService().LoginUser(r)
+	if len(token) == 0 || err != nil {
 		log.Println(err)
+		utils.Respond(w, utils.Message(http.StatusBadRequest, "Incorrect email or password"))
+		return
 	}
 
-	utils.Respond(w, utils.Message(status, msg))
+	utils.Respond(w, utils.GiveToken(token))
 	return
 }
 
