@@ -8,7 +8,8 @@ import (
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	status, msg, err := services.UserService().CreateUser(r)
+	service := services.UserService()
+	status, msg, err := service.CreateUser(r)
 	if err != nil {
 		log.Println(err)
 	}
@@ -18,7 +19,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	token, err := services.UserService().LoginUser(r)
+	service := services.UserService()
+	token, err := service.LoginUser(r)
 	if len(token) == 0 || err != nil {
 		log.Println(err)
 		utils.Respond(w, utils.Message(http.StatusBadRequest, "Incorrect email or password"))

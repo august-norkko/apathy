@@ -2,6 +2,7 @@ package services
 
 import (
 	"log"
+	"regexp"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
 	"apathy/utils"
@@ -21,10 +22,26 @@ func UserService() *Service {
 	return &Service{}
 }
 
+func validateUser(email, password string) string {
+	match, _ := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
+	if match == false {
+		return "Email invalid (example@email.com)"
+	}
+	if len(password) < 5 {
+		return "Password too short (min. 6 char)"
+	}
+	return ""
+}
+
 func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
-		return http.StatusBadRequest, "Unable to decode JSON", err
+		return http.StatusBadRequest, "Unable to decode JSON payload", err
+	}
+
+	msg := validateUser(res.Email, res.Password)
+	if len(msg) != 0 {
+		return http.StatusBadRequest, msg, err
 	}
 
 	password := []byte(res.Password)
@@ -47,6 +64,11 @@ func (s *Service) LoginUser(r *http.Request) (string, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
 		return "", err
+	}
+
+	msg := validateUser(res.Email, res.Password)
+	if len(msg) != 0 {
+		return msg, err
 	}
 
 	db, user, password := database.Mysql(), &entity.User{}, []byte(res.Password)
