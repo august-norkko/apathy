@@ -11,7 +11,8 @@ import (
 )
 
 type IUserService interface {
-	CreateUser(email, password string)
+	CreateUser(r *http.Request) (int, string, error)
+	LoginUser(r *http.Request) (int, string, error)
 }
 
 type Service struct {}

@@ -4,10 +4,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
-	"github.com/dgrijalva/jwt-go"
 	"apathy/utils"
-	"apathy/entity"
 )
 
 // requests goes through this middleware
@@ -39,7 +36,7 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		token, err := security.ParseToken(authHeader)
+		token, err := ParseToken(authHeader)
 		if err != nil {
 			log.Println(err)
 			msg := utils.Message(http.StatusForbidden, "Unable to parse JWT token")

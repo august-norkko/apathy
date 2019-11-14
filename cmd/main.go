@@ -17,10 +17,7 @@ func main() {
 	database.Initialize()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/foo", controller.FooHandler).Methods("GET")
-	router.HandleFunc("/baz", controller.BazHandler).Methods("GET")
 	router.HandleFunc("/health", controller.HealthcheckHandler)
-	
 	router.HandleFunc("/user", controller.UserHandler).Methods("POST")
 	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST")
 	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST")
