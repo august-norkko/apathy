@@ -17,9 +17,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/health", controller.HealthcheckHandler)
-	router.HandleFunc("/user", controller.UserHandler).Methods("POST")
-	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST")
-	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST")
+	router.HandleFunc("/user", controller.UserHandler).Methods("POST", "GET", "OPTIONS")
+	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST", "OPTIONS")
 	
 	router.Use(security.Authentication)
 	http.ListenAndServe(":3000", router)
@@ -35,14 +35,11 @@ func setup() {
 
 	mw := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(mw)
-	log.Print("Logging has begun.")
 
 	err = godotenv.Load()
 	if err != nil {
-		log.Println(err)
 		log.Fatal("Error loading environment file")
 	}
-	log.Println("Loaded environment file")
 
 	database.Initialize()
 	return
