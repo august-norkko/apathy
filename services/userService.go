@@ -2,6 +2,7 @@ package services
 
 import (
 	"log"
+	"fmt"
 	"regexp"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
@@ -14,6 +15,7 @@ import (
 type IUserService interface {
 	CreateUser(r *http.Request) (int, string, error)
 	LoginUser(r *http.Request) (string, error)
+	User(header string) (*entity.User, error)
 }
 
 type Service struct {}
@@ -88,4 +90,28 @@ func (s *Service) LoginUser(r *http.Request) (string, error) {
 	}
 
 	return signedToken, nil
+}
+
+func (s *Service) User(header string) (*entity.User, error) {
+	user := &entity.User{}
+	claims, err := security.ParseClaims(header)
+	if err != nil {
+		return nil, err
+	}
+
+	var email string
+	for key, value := range claims {
+		if key == "email" {
+			email = fmt.Sprint(value)
+		}
+	}
+
+	db := database.Mysql()
+	err = db.Table("users").Where("email = ?", email).First(user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = ""
+	return user, nil
 }

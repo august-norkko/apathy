@@ -32,7 +32,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
-	msg := utils.Message(http.StatusOK, "Successful")
+	header := r.Header.Get("Authorization")
+
+	service := services.UserService()
+	user, _ := service.User(header) // returns user entity
+
+	msg := utils.Message(http.StatusOK, user.Email)
 	utils.Respond(w, msg)
 	return
 }

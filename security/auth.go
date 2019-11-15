@@ -2,6 +2,7 @@ package security
 
 import (
 	"log"
+	"fmt"
 	"net/http"
 	"regexp"
 	"apathy/utils"
@@ -39,14 +40,14 @@ func Authentication(next http.Handler) http.Handler {
 		token, err := ParseToken(authHeader)
 		if err != nil {
 			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, "Unable to parse JWT token")
+			msg := utils.Message(http.StatusForbidden, fmt.Sprint(err))
 			utils.Respond(w, msg)
 			return
 		}
 
 		if !token.Valid {
 			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, "Expired or Invalid JWT token")
+			msg := utils.Message(http.StatusForbidden, fmt.Sprint(err))
 			utils.Respond(w, msg)
 			return
 		}

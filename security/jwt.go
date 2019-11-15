@@ -41,3 +41,16 @@ func ParseToken(header string) (*jwt.Token, error) {
 
 	return token, nil
 }
+
+func ParseClaims(header string) (jwt.MapClaims, error) {
+	claims := jwt.MapClaims{}
+	tokenPart := strings.Split(header, " ")[1] // don't want Bearer
+	_, err := jwt.ParseWithClaims(tokenPart, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
+}
