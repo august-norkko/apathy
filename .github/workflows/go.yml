@@ -1,0 +1,29 @@
+name: Go
+on: [push]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+
+    - name: shutdown mysql service
+      run: sudo service mysql stop
+
+    - name: Run compose
+      run: docker-compose up -d
+      env:
+        MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        MYSQL_USER: ${{ secrets.MYSQL_USER }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        ENV: ${{ secrets.ENV }}
