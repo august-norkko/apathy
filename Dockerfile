@@ -17,10 +17,6 @@ RUN go mod download
 
 COPY ./ ./
 RUN go build -o apathy ./cmd
-
-RUN cd /app
-RUN ls
-RUN cd ..
 RUN chmod +x /app/apathy
 
 ENTRYPOINT ["/app/apathy"]
