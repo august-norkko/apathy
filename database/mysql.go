@@ -17,7 +17,7 @@ func Mysql() *gorm.DB {
 
 func Initialize() {
 	var uri string = "charset=utf8&parseTime=True&loc=Local"
-	username := os.Getenv("MYSQL_USERNAME")
+	username := os.Getenv("MYSQL_USER")
 	password := os.Getenv("MYSQL_PASSWORD")
 	name := os.Getenv("MYSQL_DATABASE")
 	uri = fmt.Sprintf("%s:%s@/%s?%s", username, password, name, uri)
