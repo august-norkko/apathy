@@ -1,22 +1,22 @@
+BUILD=$(shell git rev-parse HEAD)
+PROJECT=${shell basename "$(PWD)"}
+
 GOBIN=$(shell pwd)/bin
+GOVENDOR=${shell pwd}/vendor
 GOPATH=$(shell pwd)/vendor:$(shell pwd)
 GOFILES=$(wildcard cmd/*.go)
 
-
 build:
-	@echo "Building"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build -o bin/apathy $(GOFILES)
+	@echo building $(BUILD) as $(PROJECT)
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build -o ${GOBIN}/${PROJECT} $(GOFILES)
 
 run:
-	@echo "Running $(GOFILES)"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run $(GOFILES)
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run $(GOBIN)/$(PROJECT)
 
-stop:
-	@echo "kill pid"
-	# ...
+test:
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v $(GOFILES)
 
 clean:
-	@echo "Cleaning bin"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN)
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN) ${GOVENDOR}
 
-.PHONY: build run start clean
+.PHONY: all
