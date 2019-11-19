@@ -15,9 +15,6 @@ import (
 func main() {
 	setup()
 	router := mux.NewRouter()
-
-	router.HandleFunc("/health", controller.HealthcheckHandler)
-	router.HandleFunc("/user", controller.UserHandler).Methods("POST", "GET", "OPTIONS")
 	router.HandleFunc("/user/new", controller.RegisterHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/user/login", controller.LoginHandler).Methods("POST", "OPTIONS")
 	

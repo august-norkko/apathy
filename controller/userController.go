@@ -30,14 +30,3 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	utils.Respond(w, utils.GiveToken(token))
 	return
 }
-
-func UserHandler(w http.ResponseWriter, r *http.Request) {
-	header := r.Header.Get("Authorization")
-
-	service := services.UserService()
-	user, _ := service.User(header) // returns user entity
-
-	msg := utils.Message(http.StatusOK, user.Email)
-	utils.Respond(w, msg)
-	return
-}

@@ -16,13 +16,13 @@ func Mysql() *gorm.DB {
 }
 
 func Initialize() {
-	var uri string = "charset=utf8&parseTime=True&loc=Local"
-	username := os.Getenv("MYSQL_USER")
-	password := os.Getenv("MYSQL_PASSWORD")
-	name := os.Getenv("MYSQL_DATABASE")
-	host := "localhost"
-	uri = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)
+	username	:= os.Getenv("MYSQL_USER")
+	password	:= os.Getenv("MYSQL_PASSWORD")
+	name			:= os.Getenv("MYSQL_DATABASE")
+	host 			:= "localhost"
+	uri 			:= "charset=utf8&parseTime=True&loc=Local"
 
+	uri = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
 		log.Println("Connection to MySQL failed")
@@ -30,6 +30,7 @@ func Initialize() {
 	}
 	log.Println("Connected to MySQL")
 	
+	db.LogMode(true)
 	db.AutoMigrate(&entity.User{})
 	database = db
 }

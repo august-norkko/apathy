@@ -11,10 +11,10 @@ import (
 
 var secret string = os.Getenv("JWT_SECRET")
 
-func GenerateToken(email string) (string, error) {
+func GenerateToken(id uint) (string, error) {
 	expiration := time.Now().Add(10 * time.Minute)
-	claim := &entity.Claim{
-		Email: email,
+	claim := &entity.Token{
+		Id: id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiration.Unix(),
 		},
@@ -40,17 +40,4 @@ func ParseToken(header string) (*jwt.Token, error) {
 	}
 
 	return token, nil
-}
-
-func ParseClaims(header string) (jwt.MapClaims, error) {
-	claims := jwt.MapClaims{}
-	tokenPart := strings.Split(header, " ")[1] // don't want Bearer
-	_, err := jwt.ParseWithClaims(tokenPart, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return claims, nil
 }

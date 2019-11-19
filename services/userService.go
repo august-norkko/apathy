@@ -2,7 +2,7 @@ package services
 
 import (
 	"log"
-	"fmt"
+	_ "fmt"
 	"regexp"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
@@ -10,6 +10,7 @@ import (
 	"apathy/database"
 	"apathy/entity"
 	"apathy/security"
+	"github.com/jinzhu/gorm"
 )
 
 type IUserService interface {
@@ -53,6 +54,19 @@ func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	}
 
 	db := database.Mysql()
+	user := &entity.User{}
+
+	// look for email in use
+	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return http.StatusInternalServerError, "Database connection error", err
+	}
+
+	if user.Email != "" {
+		return http.StatusBadRequest, "Email already in use", err
+	}
+
+	// create user
 	err = db.Create(&entity.User{ Email: res.Email, Password: string(hashedPassword) }).Error
 	if err != nil {
 		return http.StatusBadRequest, "Unable to create user", err
@@ -73,45 +87,23 @@ func (s *Service) LoginUser(r *http.Request) (string, error) {
 		return msg, err
 	}
 
-	db, user, password := database.Mysql(), &entity.User{}, []byte(res.Password)
+	db := database.Mysql()
+	user := &entity.User{}
+	password := []byte(res.Password)
 	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
 	if err != nil {
 		return "", err
 	}
 
-    err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
-    if err != nil {
+  err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
+  if err != nil {
 		return "", err
 	}
 
-	signedToken, err := security.GenerateToken(res.Email)
+	signedToken, err := security.GenerateToken(user.ID)
 	if err != nil {
 		return "", err
 	}
 
 	return signedToken, nil
-}
-
-func (s *Service) User(header string) (*entity.User, error) {
-	user := &entity.User{}
-	claims, err := security.ParseClaims(header)
-	if err != nil {
-		return nil, err
-	}
-
-	var email string
-	for key, value := range claims {
-		if key == "email" {
-			email = fmt.Sprint(value)
-		}
-	}
-
-	db := database.Mysql()
-	err = db.Table("users").Where("email = ?", email).First(user).Error
-	if err != nil {
-		return nil, err
-	}
-
-	user.Password = ""
-	return user, nil
 }
