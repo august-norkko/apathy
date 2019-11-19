@@ -15,7 +15,7 @@ WORKDIR $GOPATH/src/apathy
 USER u
 
 # Install modules
-COPY go.mod .
+ADD go.mod go.sum ./
 RUN go mod download
 RUN go mod verify
 
