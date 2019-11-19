@@ -2,21 +2,28 @@ FROM golang:1.13-alpine
 
 RUN apk update && \
     apk add \
-        bash \
-        build-base \
-        curl \
-        make \
-        git \
-        && rm -rf /var/cache/apk/*
+    bash \
+    build-base \
+    curl \
+    make \
+    tzdata \
+    git \
+    && rm -rf /var/cache/apk/*
 
-RUN mkdir /app
-WORKDIR /app
+RUN adduser -D -g '' u
+WORKDIR $GOPATH/src/apathy
+USER u
 
-ADD go.mod go.sum ./
+# Install modules
+COPY go.mod .
 RUN go mod download
+RUN go mod verify
 
-COPY ./ ./
-RUN go build -o apathy ./cmd
-RUN chmod +x /app/apathy
+COPY . .
 
-ENTRYPOINT ["/app/apathy"]
+# Build binary
+RUN GOOS=linux go build -a -o $GOPATH/bin/apathy ./cmd
+RUN chmod +x /go/bin/apathy
+
+# Run binary
+CMD ["/go/bin/apathy"]
