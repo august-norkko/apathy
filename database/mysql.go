@@ -4,9 +4,9 @@ import (
 	"log"
 	"fmt"
 	"os"
+	"apathy/entity"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"apathy/entity"
 )
 
 var database *gorm.DB
@@ -20,7 +20,8 @@ func Initialize() {
 	username := os.Getenv("MYSQL_USER")
 	password := os.Getenv("MYSQL_PASSWORD")
 	name := os.Getenv("MYSQL_DATABASE")
-	uri = fmt.Sprintf("%s:%s@tcp(mysql:3306)/%s?%s", username, password, name, uri)
+	host := "localhost"
+	uri = fmt.Sprintf("%s:%s@tcp(%S:3306)/%s?%s", username, password, host, name, uri)
 
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
