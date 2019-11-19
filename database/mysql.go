@@ -21,7 +21,7 @@ func Initialize() {
 	password := os.Getenv("MYSQL_PASSWORD")
 	name := os.Getenv("MYSQL_DATABASE")
 	host := "localhost"
-	uri = fmt.Sprintf("%s:%s@tcp(%S:3306)/%s?%s", username, password, host, name, uri)
+	uri = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)
 
 	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
