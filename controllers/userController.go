@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"apathy/utils"
 	"apathy/interfaces"
+	"regexp"
 )
 
 type UserController struct {
@@ -34,8 +35,9 @@ func (controller *UserController) LoginHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if len(token) <= 0 {
-		utils.Response(w, http.StatusBadRequest, "Unable to generate JWT token")
+	ok, _ := regexp.MatchString(`^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, token)
+	if !ok {
+		utils.Response(w, http.StatusBadRequest, "Validation failed")
 		return
 	}
 

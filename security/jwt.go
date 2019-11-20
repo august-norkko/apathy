@@ -31,7 +31,7 @@ func GenerateToken(id uint) (string, error) {
 
 func ParseToken(header string) (*jwt.Token, error) {
 	tokenPointer := &models.Token{}
-	tokenPart := strings.Split(header, " ")[1] // don't want Bearer
+	tokenPart := strings.Split(header, " ")[1]
 	token, err := jwt.ParseWithClaims(tokenPart, tokenPointer, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})

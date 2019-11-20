@@ -8,7 +8,6 @@ import (
 	"apathy/utils"
 )
 
-// All request goes through this middleware
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		allowed := []string{"/new", "/login", "/"}
@@ -19,17 +18,15 @@ func Authentication(next http.Handler) http.Handler {
 			}
 		}
 		
-		// Check for empty header
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
+		if len(authHeader) <= 0 {
 			msg := utils.Message(http.StatusForbidden, "Missing Authorization Header")
 			utils.Respond(w, msg)
 			return
 		}
 
-		// Check for malformed header
-		match, _ := regexp.MatchString(`^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, authHeader)
-		if match == false {
+		ok, _ := regexp.MatchString(`^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, authHeader)
+		if !ok {
 			msg := utils.Message(http.StatusForbidden, "Malformed Authorization Header")
 			utils.Respond(w, msg)
 			return

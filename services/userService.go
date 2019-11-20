@@ -1,7 +1,6 @@
 package services
 
 import (
-	_ "fmt"
 	"regexp"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
@@ -10,84 +9,67 @@ import (
 	"apathy/models"
 	"apathy/security"
 	"apathy/interfaces"
-	"github.com/jinzhu/gorm"
 )
 
 type UserService struct {
 	interfaces.IUserRepository
 }
 
-func validateUser(email, password string) string {
-	match, _ := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
-	if match == false {
-		return "Email invalid (example@email.com)"
-	}
-	if len(password) < 5 {
-		return "Password too short (min. 6 char)"
-	}
-	return ""
-}
-
-func (s *UserService) CreateUser(r *http.Request) (bool, error) {
-	res, err := utils.Decode(r)
+func (service *UserService) CreateUser(r *http.Request) (bool, error) {
+	data, err := utils.Decode(r)
 	if err != nil {
 		return false, err
 	}
 
-	msg := validateUser(res.Email, res.Password)
-	if len(msg) != 0 {
+	ok := validateUser(data.Email, data.Password)
+	if !ok {
 		return false, err
 	}
 
-	password := []byte(res.Password)
+	password := []byte(data.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
     if err != nil {
 		return false, err
 	}
 
-	db := database.Mysql()
-	user := &models.User{}
-
-	// look for email in use
-	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, err
+	ok = service.CheckForExistingEmail(r, data)
+	if !ok {
+		return false, nil
 	}
 
-	if user.Email != "" {
-		return false, err
-	}
-
-	// create user
-	err = db.Create(&models.User{ Email: res.Email, Password: string(hashedPassword) }).Error
+	ok, err = service.StoreUserInDatabase(r, hashedPassword, data)
 	if err != nil {
 		return false, err
 	}
 
+	if !ok {
+		return false, nil
+	}
+	
 	return true, nil
 }
 
-func (s *UserService) LoginUser(r *http.Request) (string, error) {
-	res, err := utils.Decode(r)
+func (service *UserService) LoginUser(r *http.Request) (string, error) {
+	data, err := utils.Decode(r)
 	if err != nil {
 		return "", err
 	}
 
-	msg := validateUser(res.Email, res.Password)
-	if len(msg) != 0 {
-		return msg, err
+	ok := validateUser(data.Email, data.Password)
+	if !ok {
+		return "Validation failed", err
 	}
 
 	db := database.Mysql()
 	user := &models.User{}
-	password := []byte(res.Password)
-	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
+	password := []byte(data.Password)
+	err = db.Table("users").Where("email = ?", data.Email).First(user).Error
 	if err != nil {
 		return "", err
 	}
 
-  err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
-  if err != nil {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
+	if err != nil {
 		return "", err
 	}
 
@@ -97,4 +79,21 @@ func (s *UserService) LoginUser(r *http.Request) (string, error) {
 	}
 
 	return signedToken, nil
+}
+
+func validateUser(email, password string) bool {
+	ok, err := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
+	if err != nil {
+		return false
+	}
+
+	if !ok {
+		return false
+	}
+
+	if len(password) < 5 {
+		return false
+	}
+
+	return true
 }
