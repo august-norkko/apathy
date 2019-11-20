@@ -22,7 +22,7 @@ RUN go mod verify
 COPY . .
 
 # Build binary
-RUN GOOS=linux go build -a -o $GOPATH/bin/apathy ./cmd
+RUN GOOS=linux go build -a -o $GOPATH/bin/apathy .
 RUN chmod +x /go/bin/apathy
 
 # Run binary
