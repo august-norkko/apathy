@@ -3,11 +3,11 @@ package utils
 import (
 	"net/http"
 	"encoding/json"
-	"apathy/entity"
+	"apathy/models"
 )
 
-func Decode(r *http.Request) (*entity.User, error) {
-	var data entity.User
+func Decode(r *http.Request) (*models.User, error) {
+	var data models.User
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		return nil, err

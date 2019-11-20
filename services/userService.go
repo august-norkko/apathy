@@ -8,21 +8,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"apathy/utils"
 	"apathy/database"
-	"apathy/entity"
+	"apathy/models"
 	"apathy/security"
+	"apathy/interfaces"
 	"github.com/jinzhu/gorm"
 )
 
-type IUserService interface {
-	CreateUser(r *http.Request) (int, string, error)
-	LoginUser(r *http.Request) (string, error)
-	User(header string) (*entity.User, error)
-}
-
-type Service struct {}
-
-func UserService() *Service {
-	return &Service{}
+type UserService struct {
+	interfaces.IUserRepository
 }
 
 func validateUser(email, password string) string {
@@ -36,7 +29,7 @@ func validateUser(email, password string) string {
 	return ""
 }
 
-func (s *Service) CreateUser(r *http.Request) (int, string, error) {
+func (s *UserService) CreateUser(r *http.Request) (int, string, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
 		return http.StatusBadRequest, "Unable to decode JSON payload", err
@@ -54,7 +47,7 @@ func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	}
 
 	db := database.Mysql()
-	user := &entity.User{}
+	user := &models.User{}
 
 	// look for email in use
 	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
@@ -67,7 +60,7 @@ func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	}
 
 	// create user
-	err = db.Create(&entity.User{ Email: res.Email, Password: string(hashedPassword) }).Error
+	err = db.Create(&models.User{ Email: res.Email, Password: string(hashedPassword) }).Error
 	if err != nil {
 		return http.StatusBadRequest, "Unable to create user", err
 	}
@@ -76,7 +69,7 @@ func (s *Service) CreateUser(r *http.Request) (int, string, error) {
 	return http.StatusOK, "User created successfully", nil
 }
 
-func (s *Service) LoginUser(r *http.Request) (string, error) {
+func (s *UserService) LoginUser(r *http.Request) (string, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
 		return "", err
@@ -88,7 +81,7 @@ func (s *Service) LoginUser(r *http.Request) (string, error) {
 	}
 
 	db := database.Mysql()
-	user := &entity.User{}
+	user := &models.User{}
 	password := []byte(res.Password)
 	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 // All request goes through this middleware
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		allowed := []string{"/user/new", "/user/login"}
+		allowed := []string{"/new", "/login"}
 		for _, current := range allowed {
 			if current == r.URL.Path {
 				next.ServeHTTP(w, r)

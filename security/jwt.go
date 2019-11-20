@@ -3,7 +3,7 @@ package security
 import (
 	"time"
 	"os"
-	"apathy/entity"
+	"apathy/models"
 	"github.com/dgrijalva/jwt-go"
 	_ "log"
 	"strings"
@@ -13,7 +13,7 @@ var secret string = os.Getenv("JWT_SECRET")
 
 func GenerateToken(id uint) (string, error) {
 	expiration := time.Now().Add(10 * time.Minute)
-	claim := &entity.Token{
+	claim := &models.Token{
 		Id: id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiration.Unix(),
@@ -30,7 +30,7 @@ func GenerateToken(id uint) (string, error) {
 }
 
 func ParseToken(header string) (*jwt.Token, error) {
-	tokenPointer := &entity.Token{}
+	tokenPointer := &models.Token{}
 	tokenPart := strings.Split(header, " ")[1] // don't want Bearer
 	token, err := jwt.ParseWithClaims(tokenPart, tokenPointer, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil

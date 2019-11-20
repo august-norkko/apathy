@@ -16,7 +16,10 @@ run:
 test:
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v $(GOFILES)
 
+remove:
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -f $(GOBIN)/$(PROJECT)
+
 clean:
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN) ${GOVENDOR}
 
-.PHONY: all
+.PHONY: test remove clean
