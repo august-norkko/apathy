@@ -4,7 +4,7 @@ PROJECT=${shell basename "$(PWD)"}
 GOBIN=$(shell pwd)/bin
 GOVENDOR=${shell pwd}/vendor
 GOPATH=$(shell pwd)/vendor:$(shell pwd)
-GOFILES=$(wildcard cmd/*.go)
+GOFILES=$(wildcard *.go)
 
 build:
 	@echo building $(BUILD) as $(PROJECT)
