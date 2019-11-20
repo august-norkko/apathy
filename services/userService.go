@@ -1,7 +1,6 @@
 package services
 
 import (
-	"regexp"
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
 	"apathy/utils"
@@ -21,7 +20,7 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	ok := validateUser(data.Email, data.Password)
+	ok := utils.ValidateUser(data.Email, data.Password)
 	if !ok {
 		return false, err
 	}
@@ -55,7 +54,7 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	ok := validateUser(data.Email, data.Password)
+	ok := utils.ValidateUser(data.Email, data.Password)
 	if !ok {
 		return "Validation failed", err
 	}
@@ -79,21 +78,4 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 	}
 
 	return signedToken, nil
-}
-
-func validateUser(email, password string) bool {
-	ok, err := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
-	if err != nil {
-		return false
-	}
-
-	if !ok {
-		return false
-	}
-
-	if len(password) < 5 {
-		return false
-	}
-
-	return true
 }

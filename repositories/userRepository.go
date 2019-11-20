@@ -29,7 +29,8 @@ func (repository *UserRepository) CheckForExistingEmail(r *http.Request, data *m
 
 func (repository *UserRepository) StoreUserInDatabase(r *http.Request, hashedPassword []byte, data *models.User) (bool, error) {
 	db := database.Mysql()
-	err := db.Create(&models.User{ Email: data.Email, Password: string(hashedPassword) }).Error
+	user := &models.User{ Email: data.Email, Password: string(hashedPassword) }
+	err := db.Create(user).Error
 	if err != nil {
 		return false, err
 	}
