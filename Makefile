@@ -20,6 +20,6 @@ remove:
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -f $(GOBIN)/$(PROJECT)
 
 clean:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN) ${GOVENDOR}
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN) $(GOVENDOR)
 
 .PHONY: test remove clean

@@ -3,7 +3,7 @@ package main
 import (
 	"apathy/services"
 	"apathy/repositories"
-	controllers "apathy/controllers"
+	"apathy/controllers"
 )
 
 type IContainer interface {
