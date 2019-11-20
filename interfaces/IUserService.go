@@ -5,6 +5,6 @@ import (
 )
 
 type IUserService interface {
-	CreateUser(r *http.Request) (int, string, error)
+	CreateUser(r *http.Request) (bool, error)
 	LoginUser(r *http.Request) (string, error)
 }

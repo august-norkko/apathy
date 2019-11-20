@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"log"
+	_ "log"
 	"net/http"
 	"apathy/utils"
 	"apathy/interfaces"
@@ -12,27 +12,33 @@ type UserController struct {
 }
 
 func (controller *UserController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	status, msg, err := controller.CreateUser(r)
+	ok, err := controller.CreateUser(r)
 	if err != nil {
-		log.Println(err)
+		utils.Response(w, http.StatusInternalServerError, "Internal Server Error")
+		return
 	}
 
-	utils.Respond(w, utils.Message(status, msg))
+	if !ok {
+		utils.Response(w, http.StatusBadRequest, "Failed to create user")
+		return
+	}
+
+	utils.Response(w, http.StatusOK, "Created user successfully")
 	return
 }
 
 func (controller *UserController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	token, err := controller.LoginUser(r)
-	if len(token) == 0 || err != nil {
-		log.Println(err)
-		utils.Respond(w, utils.Message(http.StatusBadRequest, "Incorrect email or password"))
+	if err != nil {
+		utils.Response(w, http.StatusBadRequest, "Incorrect credentials")
 		return
 	}
 
-	utils.Respond(w, utils.GiveToken(token))
-	return
-}
+	if len(token) <= 0 {
+		utils.Response(w, http.StatusBadRequest, "Unable to generate JWT token")
+		return
+	}
 
-func (controller *UserController) UserHandler(w http.ResponseWriter, r *http.Request) {
-	utils.Respond(w, utils.Message(http.StatusOK, "Authenticated"))
+	utils.ResponseToken(w, token)
+	return
 }

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	_ "fmt"
 	"regexp"
 	"net/http"
@@ -29,21 +28,21 @@ func validateUser(email, password string) string {
 	return ""
 }
 
-func (s *UserService) CreateUser(r *http.Request) (int, string, error) {
+func (s *UserService) CreateUser(r *http.Request) (bool, error) {
 	res, err := utils.Decode(r)
 	if err != nil {
-		return http.StatusBadRequest, "Unable to decode JSON payload", err
+		return false, err
 	}
 
 	msg := validateUser(res.Email, res.Password)
 	if len(msg) != 0 {
-		return http.StatusBadRequest, msg, err
+		return false, err
 	}
 
 	password := []byte(res.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
     if err != nil {
-		return http.StatusBadRequest, "Unable to generate hash", err
+		return false, err
 	}
 
 	db := database.Mysql()
@@ -52,21 +51,20 @@ func (s *UserService) CreateUser(r *http.Request) (int, string, error) {
 	// look for email in use
 	err = db.Table("users").Where("email = ?", res.Email).First(user).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return http.StatusInternalServerError, "Database connection error", err
+		return false, err
 	}
 
 	if user.Email != "" {
-		return http.StatusBadRequest, "Email already in use", err
+		return false, err
 	}
 
 	// create user
 	err = db.Create(&models.User{ Email: res.Email, Password: string(hashedPassword) }).Error
 	if err != nil {
-		return http.StatusBadRequest, "Unable to create user", err
+		return false, err
 	}
 
-	log.Println("Saved user ", res.Email)
-	return http.StatusOK, "User created successfully", nil
+	return true, nil
 }
 
 func (s *UserService) LoginUser(r *http.Request) (string, error) {
