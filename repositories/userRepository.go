@@ -38,3 +38,14 @@ func (repository *UserRepository) StoreUserInDatabase(r *http.Request, hashedPas
 	return true, nil
 }
 
+func (repository *UserRepository) FetchUser(r *http.Request, email string) (*models.User, error) {
+	db := database.Mysql()
+	user := &models.User{}
+
+	err := db.Table("users").Where("email = ?", email).First(user).Error
+	if err != nil {
+		return &models.User{}, err
+	}
+
+	return user, nil
+}

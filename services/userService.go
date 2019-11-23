@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
 	"apathy/utils"
-	"apathy/database"
-	"apathy/models"
 	"apathy/security"
 	"apathy/interfaces"
 )
@@ -22,13 +20,13 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 
 	ok := utils.ValidateUser(data.Email, data.Password)
 	if !ok {
-		return false, err
+		return false, nil
 	}
 
 	password := []byte(data.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-    if err != nil {
-		return false, err
+  if err != nil {
+			return false, err
 	}
 
 	ok = service.CheckForExistingEmail(r, data)
@@ -56,18 +54,15 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 
 	ok := utils.ValidateUser(data.Email, data.Password)
 	if !ok {
-		return "Validation failed", err
+		return "Validation failed", nil
 	}
 
-	db := database.Mysql()
-	user := &models.User{}
-	password := []byte(data.Password)
-	err = db.Table("users").Where("email = ?", data.Email).First(user).Error
+	user, err := service.FetchUser(r, data.Email)
 	if err != nil {
 		return "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), password)
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 	if err != nil {
 		return "", err
 	}
