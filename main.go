@@ -22,7 +22,7 @@ func main() {
 	err = godotenv.Load()
 	if err != nil {
 		log.Println(err)
-		log.Fatal("Error loading environment file")
+		log.Fatal("Error loading .env file")
 	}
 
 	database.Initialize()

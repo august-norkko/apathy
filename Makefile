@@ -3,23 +3,24 @@ PROJECT=${shell basename "$(PWD)"}
 
 GOBIN=$(shell pwd)/bin
 GOVENDOR=${shell pwd}/vendor
-GOPATH=$(shell pwd)/vendor:$(shell pwd)
 GOFILES=$(wildcard *.go)
 
+.PHONY: build
 build:
 	@echo building $(BUILD) as $(PROJECT)
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build -o ${GOBIN}/${PROJECT} $(GOFILES)
+	go build -o apathy $(GOFILES)
 
+.PHONY: run
 run:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run $(GOBIN)/$(PROJECT)
+	@echo running binary
+	go run $(GOBIN)/$(PROJECT)
 
+.PHONY: test
 test:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v $(GOFILES)
+	@echo running tests
+	go test -v $(GOFILES)
 
-remove:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -f $(GOBIN)/$(PROJECT)
-
+.PHONY: clean
 clean:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) rm -rf $(GOBIN) $(GOVENDOR)
-
-.PHONY: test remove clean
+	@echo removing build
+	rm -f $(GOBIN) $(GOVENDOR) $(GOBIN)/$(PROJECT) 
