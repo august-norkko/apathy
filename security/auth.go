@@ -1,7 +1,6 @@
 package security
 
 import (
-	"log"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -10,7 +9,12 @@ import (
 
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		allowed := []string{"/new", "/login", "/"}
+		allowed := []string{
+			"/new",
+			"/login",
+			"/",
+		}
+
 		for _, current := range allowed {
 			if current == r.URL.Path {
 				next.ServeHTTP(w, r)
@@ -20,30 +24,24 @@ func Authentication(next http.Handler) http.Handler {
 		
 		authHeader := r.Header.Get("Authorization")
 		if len(authHeader) <= 0 {
-			msg := utils.Message(http.StatusForbidden, "Missing Authorization Header")
-			utils.Respond(w, msg)
+			utils.Response(w, http.StatusBadRequest, "Missing Authorization header")
 			return
 		}
 
 		ok, _ := regexp.MatchString(`^Bearer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`, authHeader)
 		if !ok {
-			msg := utils.Message(http.StatusForbidden, "Malformed Authorization Header")
-			utils.Respond(w, msg)
+			utils.Response(w, http.StatusBadRequest, "Malformed Authorization header")
 			return
 		}
 
 		token, err := ParseToken(authHeader)
 		if err != nil {
-			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, fmt.Sprint(err))
-			utils.Respond(w, msg)
+			utils.Response(w, http.StatusBadRequest, fmt.Sprint(err))
 			return
 		}
 
 		if !token.Valid {
-			log.Println(err)
-			msg := utils.Message(http.StatusForbidden, fmt.Sprint(err))
-			utils.Respond(w, msg)
+			utils.Response(w, http.StatusBadRequest, fmt.Sprint(err))
 			return
 		}
 

@@ -18,8 +18,14 @@ func Container() IContainer {
 
 func (c *container) InjectUserController() controllers.UserController {
 	userRepository := &repositories.UserRepository{}
-	userService := &services.UserService{userRepository}
-	userController := controllers.UserController{userService}
+	
+	userService := &services.UserService{
+		userRepository,
+	}
+	
+	userController := controllers.UserController{
+		userService,
+	}
 
 	return userController
 }
