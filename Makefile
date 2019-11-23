@@ -1,26 +1,27 @@
-BUILD=$(shell git rev-parse HEAD)
-PROJECT=${shell basename "$(PWD)"}
+# Makefile
 
-GOBIN=$(shell pwd)/bin
-GOVENDOR=${shell pwd}/vendor
+BUILD=$(shell git rev-parse HEAD)
+PROJECT=$(shell basename "${PWD}")
+GOVENDOR=$(shell pwd)/vendor
 GOFILES=$(wildcard *.go)
+TESTFILES=$(wildcard **/*_test.go)
 
 .PHONY: build
 build:
 	@echo building $(BUILD) as $(PROJECT)
-	go build -o apathy $(GOFILES)
+	GOOS=linux go build -o $(PROJECT) $(GOFILES)
 
 .PHONY: run
 run:
 	@echo running binary
-	go run $(GOBIN)/$(PROJECT)
+	go run $(PROJECT)
 
 .PHONY: test
 test:
 	@echo running tests
-	go test -v $(GOFILES)
+	go test -v $(TESTFILES)
 
 .PHONY: clean
 clean:
 	@echo removing build
-	rm -f $(GOBIN) $(GOVENDOR) $(GOBIN)/$(PROJECT) 
+	rm -rf -f $(GOVENDOR) $(PROJECT)
