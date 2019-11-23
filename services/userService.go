@@ -3,7 +3,7 @@ package services
 import (
 	"net/http"
 	"golang.org/x/crypto/bcrypt"
-	"apathy/utils"
+	"apathy/response"
 	"apathy/security"
 	"apathy/interfaces"
 )
@@ -13,12 +13,12 @@ type UserService struct {
 }
 
 func (service *UserService) CreateUser(r *http.Request) (bool, error) {
-	data, err := utils.Decode(r)
+	data, err := response.Decode(r)
 	if err != nil {
 		return false, err
 	}
 
-	ok := utils.ValidateUser(data.Email, data.Password)
+	ok := response.ValidateUser(data.Email, data.Password)
 	if !ok {
 		return false, nil
 	}
@@ -47,12 +47,12 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 }
 
 func (service *UserService) LoginUser(r *http.Request) (string, error) {
-	data, err := utils.Decode(r)
+	data, err := response.Decode(r)
 	if err != nil {
 		return "", err
 	}
 
-	ok := utils.ValidateUser(data.Email, data.Password)
+	ok := response.ValidateUser(data.Email, data.Password)
 	if !ok {
 		return "Validation failed", nil
 	}

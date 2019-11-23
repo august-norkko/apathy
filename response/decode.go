@@ -1,4 +1,4 @@
-package utils
+package response
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"apathy/models"
 )
 
-func Decode(r *http.Request) (*models.User, error) {
+func Decode(r *http.Request) (*models.User, error) { // move from response package
 	var data models.User
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
