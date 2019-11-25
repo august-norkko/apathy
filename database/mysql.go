@@ -19,7 +19,7 @@ func Initialize() {
 	username	:= os.Getenv("MYSQL_USER")
 	password	:= os.Getenv("MYSQL_PASSWORD")
 	name		:= os.Getenv("MYSQL_DATABASE")
-	host 		:= "localhost"
+	host 		:= "mysql"
 	uri 		:= "charset=utf8&parseTime=True&loc=Local"
 
 	uri = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)

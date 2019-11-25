@@ -3,7 +3,6 @@ package response
 import (
 	"net/http"
 	"encoding/json"
-	_ "fmt"
 )
 
 func Send(w http.ResponseWriter, status int, m string) {
