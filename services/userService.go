@@ -2,7 +2,6 @@ package services
 
 import (
 	"net/http"
-	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
 	"regexp"
 	"apathy/security"
@@ -25,10 +24,9 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	password := []byte(data.Password)
-	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
-  if err != nil {
-			return false, err
+	hash, err := security.Generate([]byte(data.Password))
+	if err != nil {
+		return false, err
 	}
 
 	ok = service.CheckForExistingEmail(r, data)
@@ -36,7 +34,7 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	ok, err = service.StoreUserInDatabase(r, hashedPassword, data)
+	ok, err = service.StoreUserInDatabase(r, hash, data)
 	if err != nil {
 		return false, err
 	}
@@ -64,8 +62,8 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
-	if err != nil {
+	ok, err = security.Compare([]byte(user.Password), []byte(data.Password))
+	if err != nil || !ok {
 		return "", err
 	}
 
