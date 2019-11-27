@@ -2,13 +2,11 @@ package controllers
 
 import (
 	"net/http"
+	"fmt"
+	"regexp"
 	"apathy/response"
 	"apathy/interfaces"
 	"apathy/security"
-
-	"fmt"
-	"regexp"
-	_ "strings"
 )
 
 type UserController struct {
@@ -50,8 +48,7 @@ func (controller *UserController) LoginHandler(w http.ResponseWriter, r *http.Re
 
 func (controller *UserController) DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := security.ParseToken(r.Header.Get("Authorization"))
-
-	fmt.Println()
-	response.Send(w, http.StatusOK, fmt.Sprint(claims))
+	id := claims.Id
+	response.Send(w, http.StatusOK, fmt.Sprint(id))
 	return
 }

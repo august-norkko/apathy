@@ -14,7 +14,7 @@ type UserService struct {
 }
 
 func (service *UserService) CreateUser(r *http.Request) (bool, error) {
-	data, err := decode(r)
+	data, err := decodeUserModel(r)
 	if err != nil {
 		return false, err
 	}
@@ -47,7 +47,7 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 }
 
 func (service *UserService) LoginUser(r *http.Request) (string, error) {
-	data, err := decode(r)
+	data, err := decodeUserModel(r)
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 	return signedToken, nil
 }
 
-func decode(r *http.Request) (*models.User, error) {
+func decodeUserModel(r *http.Request) (*models.User, error) {
 	var data models.User
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
