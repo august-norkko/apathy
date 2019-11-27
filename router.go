@@ -20,10 +20,10 @@ func (router *router) InitializeRouter() *mux.Router {
 	r.Use(security.Authentication)
 
 	container := Container()
-	userController := container.InjectUserController()
-	r.HandleFunc("/new", userController.RegisterHandler)
-	r.HandleFunc("/login", userController.LoginHandler)
-	r.HandleFunc("/dashboard", userController.DashboardHandler)
+	accountController := container.InjectAccountController()
+	r.HandleFunc("/new", accountController.RegisterHandler)
+	r.HandleFunc("/login", accountController.LoginHandler)
+	r.HandleFunc("/dashboard", accountController.DashboardHandler)
 	
 	return r
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type IContainer interface {
-	InjectUserController() controllers.UserController
+	InjectAccountController() controllers.AccountController
 }
 
 type container struct{}
@@ -16,9 +16,9 @@ func Container() IContainer {
 	return &container{}
 }
 
-func (c *container) InjectUserController() controllers.UserController {
-	userRepository := &repositories.UserRepository{}
-	userService := &services.UserService{userRepository}
-	userController := controllers.UserController{userService}
-	return userController
+func (container *container) InjectAccountController() controllers.AccountController {
+	accountRepository := &repositories.AccountRepository{}
+	accountService := &services.AccountService{accountRepository}
+	accountController := controllers.AccountController{accountService}
+	return accountController
 }

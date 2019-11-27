@@ -9,28 +9,28 @@ import (
 	"apathy/security"
 )
 
-type UserController struct {
-	interfaces.IUserService
+type AccountController struct {
+	interfaces.IAccountService
 }
 
-func (controller *UserController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	ok, err := controller.CreateUser(r)
+func (controller *AccountController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	ok, err := controller.CreateAccount(r)
 	if err != nil {
 		response.Send(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
 	if !ok {
-		response.Send(w, http.StatusBadRequest, "Failed to create user")
+		response.Send(w, http.StatusBadRequest, "Failed to create account")
 		return
 	}
 
-	response.Send(w, http.StatusOK, "Created user successfully")
+	response.Send(w, http.StatusOK, "Created account successfully")
 	return
 }
 
-func (controller *UserController) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	token, err := controller.LoginUser(r)
+func (controller *AccountController) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	token, err := controller.LoginAccount(r)
 	if err != nil {
 		response.Send(w, http.StatusBadRequest, "Incorrect credentials")
 		return
@@ -44,9 +44,9 @@ func (controller *UserController) LoginHandler(w http.ResponseWriter, r *http.Re
 
 	response.SendToken(w, token)
 	return
-}
+}	
 
-func (controller *UserController) DashboardHandler(w http.ResponseWriter, r *http.Request) {
+func (controller *AccountController) DashboardHandler(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := security.ParseToken(r.Header.Get("Authorization"))
 	id := claims.Id
 	response.Send(w, http.StatusOK, fmt.Sprint(id))

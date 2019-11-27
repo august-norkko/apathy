@@ -9,17 +9,17 @@ import (
 	"apathy/models"
 )
 
-type UserService struct {
-	interfaces.IUserRepository
+type AccountService struct {
+	interfaces.IAccountRepository
 }
 
-func (service *UserService) CreateUser(r *http.Request) (bool, error) {
-	data, err := decodeUserModel(r)
+func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
+	data, err := decodeAccountModel(r)
 	if err != nil {
 		return false, err
 	}
 
-	ok := validateUser(data.Email, data.Password)
+	ok := validateAccount(data.Email, data.Password)
 	if !ok {
 		return false, nil
 	}
@@ -34,7 +34,7 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	ok, err = service.StoreUserInDatabase(r, hash, data)
+	ok, err = service.StoreAccountInDatabase(r, hash, data)
 	if err != nil {
 		return false, err
 	}
@@ -46,18 +46,18 @@ func (service *UserService) CreateUser(r *http.Request) (bool, error) {
 	return true, nil
 }
 
-func (service *UserService) LoginUser(r *http.Request) (string, error) {
-	data, err := decodeUserModel(r)
+func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
+	data, err := decodeAccountModel(r)
 	if err != nil {
 		return "", err
 	}
 
-	ok := validateUser(data.Email, data.Password)
+	ok := validateAccount(data.Email, data.Password)
 	if !ok {
 		return "Validation failed", nil
 	}
 
-	user, err := service.FetchUser(r, data.Email)
+	user, err := service.FetchAccount(r, data.Email)
 	if err != nil {
 		return "", err
 	}
@@ -75,8 +75,8 @@ func (service *UserService) LoginUser(r *http.Request) (string, error) {
 	return signedToken, nil
 }
 
-func decodeUserModel(r *http.Request) (*models.User, error) {
-	var data models.User
+func decodeAccountModel(r *http.Request) (*models.Account, error) {
+	var data models.Account
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func decodeUserModel(r *http.Request) (*models.User, error) {
 	return &data, nil
 }
 
-func validateUser(email, password string) bool {
+func validateAccount(email, password string) bool {
 	ok, err := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
 	if err != nil {
 		return false

@@ -16,25 +16,20 @@ func Mysql() *gorm.DB {
 }
 
 func Initialize() {
-	db, err := gorm.Open("mysql", constructUri())	
+	username	:= os.Getenv("MYSQL_USER")
+	password	:= os.Getenv("MYSQL_PASSWORD")
+	name		:= os.Getenv("MYSQL_DATABASE")
+	host 		:= "localhost"
+	uri 		:= "charset=utf8&parseTime=True&loc=Local"
+
+	uri = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)
+	db, err := gorm.Open("mysql", uri)	
 	if err != nil {
 		log.Println("Connection to MySQL failed")
 		log.Fatal(err)
 	}
+	
 	db.LogMode(true)
+	db.AutoMigrate(&models.Account{})
 	database = db
-	migrations()
-}
-
-func constructUri() string {
-	username := os.Getenv("MYSQL_USER")
-	password := os.Getenv("MYSQL_PASSWORD")
-	name	 := os.Getenv("MYSQL_DATABASE")
-	host 	 := os.Getenv("MYSQL_HOST")
-	uri 	 := "charset=utf8&parseTime=True&loc=Local"
-	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?%s", username, password, host, name, uri)
-}
-
-func migrations() {
-	database.AutoMigrate(&models.User{})
 }
