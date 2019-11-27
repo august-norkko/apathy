@@ -5,7 +5,6 @@ import (
 	"os"
 	"apathy/models"
 	"github.com/dgrijalva/jwt-go"
-	_ "log"
 	"strings"
 )
 
@@ -29,15 +28,17 @@ func GenerateToken(id uint) (string, error) {
 	return signedToken, nil
 }
 
-func ParseToken(header string) (*jwt.Token, error) {
-	tokenPointer := &models.Token{}
-	tokenPart := strings.Split(header, " ")[1]
-	token, err := jwt.ParseWithClaims(tokenPart, tokenPointer, func(t *jwt.Token) (interface{}, error) {
+func ParseToken(header string) (*jwt.Token, *models.Token, error) {
+	tokenModel := &models.Token{}
+	headerPart := strings.Split(header, " ")[1]
+
+	token, err := jwt.ParseWithClaims(headerPart, tokenModel, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
+
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return token, nil
+	return token, tokenModel, nil
 }

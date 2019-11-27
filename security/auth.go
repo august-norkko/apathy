@@ -34,7 +34,7 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		token, err := ParseToken(authHeader)
+		token, _, err := ParseToken(authHeader)
 		if err != nil {
 			response.Send(w, http.StatusBadRequest, fmt.Sprint(err))
 			return

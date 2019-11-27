@@ -23,6 +23,7 @@ func (router *router) InitializeRouter() *mux.Router {
 	userController := container.InjectUserController()
 	r.HandleFunc("/new", userController.RegisterHandler)
 	r.HandleFunc("/login", userController.LoginHandler)
+	r.HandleFunc("/home", userController.DashboardHandler)
 	
 	return r
 }
