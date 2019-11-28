@@ -46,6 +46,19 @@ func (repository *AccountRepository) UpdateAccountInDatabase(r *http.Request, da
 	return true, nil
 }
 
+func (repository *AccountRepository) DeleteAccountInDatabase(r *http.Request, data *models.Account) (bool, error) {
+	id := r.Context().Value("id").(uint)
+	account := &models.Account{}
+	db := database.Mysql()
+
+	err := db.Where("id = ?", id).Delete(&account).Error
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (repository *AccountRepository) CheckForEmailInUse(r *http.Request, email string) bool {
 	db := database.Mysql()
 	account := &models.Account{}

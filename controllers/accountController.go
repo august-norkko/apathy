@@ -71,3 +71,14 @@ func (controller *AccountController) DashboardHandler(w http.ResponseWriter, r *
 	})
 	return
 }
+
+func (controller *AccountController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	ok, _ := controller.DeleteAccount(r)
+	if !ok {
+		response.Send(w, http.StatusBadRequest, "Unable to delete account")
+		return
+	}
+
+	response.Send(w, http.StatusOK, "Successfully deleted account")
+	return
+}

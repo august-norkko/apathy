@@ -26,6 +26,6 @@ func (router *router) InitializeRouter() *mux.Router {
 
 	r.HandleFunc("/account", accountController.DashboardHandler).Methods("GET")
 	r.HandleFunc("/account", accountController.UpdateHandler).Methods("PUT")
-	
+	r.HandleFunc("/account", accountController.DeleteHandler).Methods("DELETE")
 	return r
 }

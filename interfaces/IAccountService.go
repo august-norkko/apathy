@@ -10,4 +10,5 @@ type IAccountService interface {
 	LoginAccount(r *http.Request) (string, error)
 	UpdateAccount(r *http.Request) (bool, error)
 	FetchAccount(r *http.Request) (*models.Account, error)
+	DeleteAccount(r *http.Request) (bool, error)
 }

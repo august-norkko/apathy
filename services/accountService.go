@@ -58,18 +58,13 @@ func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	ok := data.ValidateNewAccount(data)
-	if !ok {
-		return "Validation failed", nil
-	}
-
 	account, err := service.FetchAccountFromDatabase(r)
 	if err != nil {
 		return "", err
 	}
 
-	ok, err = security.Compare([]byte(account.Password), []byte(data.Password))
-	if err != nil || !ok {
+	ok, err := security.Compare([]byte(account.Password), []byte(data.Password))
+	if !ok {
 		return "", err
 	}
 
@@ -102,6 +97,20 @@ func (service *AccountService) FetchAccount(r *http.Request) (*models.Account, e
 	}
 
 	return account, nil
+}
+
+func (service *AccountService) DeleteAccount(r *http.Request) (bool, error) {
+	account, err := decodeAccountModel(r)
+	if err != nil {
+		return false, err
+	}
+
+	ok, err := service.DeleteAccountInDatabase(r, account)
+	if !ok {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func decodeAccountModel(r *http.Request) (*models.Account, error) {
