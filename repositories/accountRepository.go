@@ -6,7 +6,6 @@ import (
 	"apathy/models"
 	"apathy/database"
 	"github.com/jinzhu/gorm"
-	"fmt"
 )
 
 const (
@@ -17,14 +16,8 @@ type AccountRepository struct {
 	AccountRepository interfaces.IAccountRepository
 }
 
-func (repository *AccountRepository) StoreAccountInDatabase(r *http.Request, hashedPassword []byte, data *models.Account) (bool, error) {
-	fmt.Println(data)
-	account := &models.Account{
-		Username: data.Username,
-		Email: data.Email,
-		Password: string(hashedPassword),
-	}
-
+func (repository *AccountRepository) StoreAccountInDatabase(r *http.Request, hashedPassword []byte, account *models.Account) (bool, error) {
+	account.Password = string(hashedPassword)
 	err := database.Mysql().Create(account).Error
 	if err != nil {
 		return false, err
@@ -43,10 +36,8 @@ func (repository *AccountRepository) UpdateAccountInDatabase(r *http.Request, da
 		return false, err
 	}
 
-	account.Username = data.Username
 	account.Location = data.Location
 	account.About = data.About
-
 	err = db.Save(account).Error
 	if err != nil {
 		return false, err

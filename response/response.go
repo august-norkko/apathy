@@ -5,10 +5,16 @@ import (
 	"encoding/json"
 )
 
-func Send(w http.ResponseWriter, status int, m string) {
+func Send(w http.ResponseWriter, status int, msg string) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]interface{} { "message": m })
+	json.NewEncoder(w).Encode(map[string]interface{} { "message": msg })
+}
+
+func SendError(w http.ResponseWriter, status int, data map[string]interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
 }
 
 func SendConstructedObject(w http.ResponseWriter, status int, data map[string]interface{}) {

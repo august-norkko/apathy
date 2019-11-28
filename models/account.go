@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"regexp"
-	"fmt"
 )
 
 type Account struct {
@@ -21,7 +20,7 @@ func (account *Account) ValidateNewAccount(data *Account) bool {
 		return false
 	}
 
-	ok, _ = regexp.MatchString(`(^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$)`, data.Username)
+	ok, _ = regexp.MatchString(`(^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)*$)`, data.Username)
 	if !ok {
 		return false
 	}
