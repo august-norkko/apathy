@@ -3,7 +3,6 @@ package services
 import (
 	"net/http"
 	"encoding/json"
-	"regexp"
 	"apathy/security"
 	"apathy/interfaces"
 	"apathy/models"
@@ -19,7 +18,7 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	ok := validateAccount(data.Email, data.Password)
+	ok := data.ValidateNewAccount(data.Email, data.Password)
 	if !ok {
 		return false, nil
 	}
@@ -29,7 +28,7 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	ok = service.CheckForExistingEmail(r, data)
+	ok = service.CheckForExistingEmailInDatabase(r, data)
 	if !ok {
 		return false, nil
 	}
@@ -52,27 +51,50 @@ func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	ok := validateAccount(data.Email, data.Password)
+	ok := data.ValidateNewAccount(data.Email, data.Password)
 	if !ok {
 		return "Validation failed", nil
 	}
 
-	user, err := service.FetchAccount(r, data.Email)
+	account, err := service.FetchAccountFromDatabase(r)
 	if err != nil {
 		return "", err
 	}
 
-	ok, err = security.Compare([]byte(user.Password), []byte(data.Password))
+	ok, err = security.Compare([]byte(account.Password), []byte(data.Password))
 	if err != nil || !ok {
 		return "", err
 	}
 
-	signedToken, err := security.GenerateToken(user.ID)
+	signedToken, err := security.GenerateToken(account.ID)
 	if err != nil {
 		return "", err
 	}
 
 	return signedToken, nil
+}
+
+func (service *AccountService) UpdateAccount(r *http.Request) (bool, error) {
+	updatedAccount, err := decodeAccountModel(r)
+	if err != nil {
+		return false, err
+	}
+
+	ok, err := service.UpdateAccountInDatabase(r, updatedAccount)
+	if !ok {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (service *AccountService) FetchAccount(r *http.Request) (*models.Account, error) {
+	account, err := service.FetchAccountFromDatabase(r)
+	if err != nil {
+		return &models.Account{}, err
+	}
+
+	return account, nil
 }
 
 func decodeAccountModel(r *http.Request) (*models.Account, error) {
@@ -84,19 +106,3 @@ func decodeAccountModel(r *http.Request) (*models.Account, error) {
 	return &data, nil
 }
 
-func validateAccount(email, password string) bool {
-	ok, err := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
-	if err != nil {
-		return false
-	}
-
-	if !ok {
-		return false
-	}
-
-	if len(password) < 5 {
-		return false
-	}
-
-	return true
-}

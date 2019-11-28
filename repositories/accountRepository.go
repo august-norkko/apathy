@@ -16,25 +16,10 @@ type AccountRepository struct {
 	AccountRepository interfaces.IAccountRepository
 }
 
-func (repository *AccountRepository) CheckForExistingEmail(r *http.Request, data *models.Account) bool {
-	db := database.Mysql()
-	user := &models.Account{}
-	err := db.Table(table).Where("email = ?", data.Email).First(user).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false
-	}
-
-	if user.Email != "" {
-		return false
-	}
-
-	return true
-}
-
 func (repository *AccountRepository) StoreAccountInDatabase(r *http.Request, hashedPassword []byte, data *models.Account) (bool, error) {
 	db := database.Mysql()
-	user := &models.Account{ Email: data.Email, Password: string(hashedPassword) }
-	err := db.Create(user).Error
+	account := &models.Account{ Email: data.Email, Password: string(hashedPassword) }
+	err := db.Create(account).Error
 	if err != nil {
 		return false, err
 	}
@@ -42,14 +27,51 @@ func (repository *AccountRepository) StoreAccountInDatabase(r *http.Request, has
 	return true, nil
 }
 
-func (repository *AccountRepository) FetchAccount(r *http.Request, email string) (*models.Account, error) {
+func (repository *AccountRepository) UpdateAccountInDatabase(r *http.Request, data *models.Account) (bool, error) {
+	id := r.Context().Value("id").(uint)
+	account := &models.Account{}
 	db := database.Mysql()
-	user := &models.Account{}
 
-	err := db.Table(table).Where("email = ?", email).First(user).Error
+	err := db.Where("id = ?", id).First(&account).Error
+	if err != nil {
+		return false, err
+	}
+
+	account.Username = data.Username
+	account.Location = data.Location
+	account.About = data.About
+
+	err = db.Save(account).Error
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (repository *AccountRepository) CheckForExistingEmailInDatabase(r *http.Request, data *models.Account) bool {
+	db := database.Mysql()
+	account := &models.Account{}
+	err := db.Table(table).Where("email = ?", data.Email).First(account).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return false
+	}
+
+	if account.Email != "" {
+		return false
+	}
+
+	return true
+}
+
+func (repository *AccountRepository) FetchAccountFromDatabase(r *http.Request) (*models.Account, error) {
+	id := r.Context().Value("id").(uint)
+	account := &models.Account{}
+
+	err := database.Mysql().Table(table).Where("id = ?", id).First(account).Error
 	if err != nil {
 		return &models.Account{}, err
 	}
 
-	return user, nil
+	return account, nil
 }

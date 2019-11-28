@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"context"
 	"apathy/response"
 )
 
@@ -34,7 +35,7 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		token, _, err := ParseToken(authHeader)
+		token, claims, err := ParseToken(authHeader)
 		if err != nil {
 			response.Send(w, http.StatusBadRequest, fmt.Sprint(err))
 			return
@@ -44,6 +45,9 @@ func Authentication(next http.Handler) http.Handler {
 			response.Send(w, http.StatusBadRequest, fmt.Sprint(err))
 			return
 		}
+
+		c := context.WithValue(r.Context(), "id", claims.Id)
+		r = r.WithContext(c)
 
 		next.ServeHTTP(w, r)
 		return

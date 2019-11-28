@@ -23,7 +23,8 @@ func (router *router) InitializeRouter() *mux.Router {
 	accountController := container.InjectAccountController()
 	r.HandleFunc("/new", accountController.RegisterHandler)
 	r.HandleFunc("/login", accountController.LoginHandler)
-	r.HandleFunc("/dashboard", accountController.DashboardHandler)
+	r.HandleFunc("/account", accountController.DashboardHandler).Methods("GET")
+	r.HandleFunc("/account", accountController.UpdateHandler).Methods("PUT")
 	
 	return r
 }

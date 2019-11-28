@@ -10,8 +10,12 @@ import (
 
 var secret string = os.Getenv("JWT_SECRET")
 
+const (
+	EXPIRESIN = 60 * time.Minute
+)
+
 func GenerateToken(id uint) (string, error) {
-	expiration := time.Now().Add(10 * time.Minute)
+	expiration := time.Now().Add(EXPIRESIN)
 	claim := &models.Token{
 		Id: id,
 		StandardClaims: jwt.StandardClaims{

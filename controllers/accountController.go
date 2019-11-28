@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"apathy/response"
 	"apathy/interfaces"
-	"apathy/security"
 )
 
 type AccountController struct {
@@ -44,11 +43,31 @@ func (controller *AccountController) LoginHandler(w http.ResponseWriter, r *http
 
 	response.SendToken(w, token)
 	return
-}	
+}
+
+func (controller *AccountController) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	ok, err := controller.UpdateAccount(r)
+	if !ok {
+		response.Send(w, http.StatusBadRequest, fmt.Sprint(err))
+		return
+	}
+
+	response.Send(w, http.StatusOK, "Successfully updated account")
+	return
+}
 
 func (controller *AccountController) DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	_, claims, _ := security.ParseToken(r.Header.Get("Authorization"))
-	id := claims.Id
-	response.Send(w, http.StatusOK, fmt.Sprint(id))
+	data, err := controller.FetchAccount(r)
+	if err != nil {
+		response.Send(w, http.StatusBadRequest, "Unable to fetch account")
+		return
+	}
+
+	response.SendConstructedObject(w, http.StatusOK, map[string]interface{} {
+		"username": data.Username,
+		"email": data.Email,
+		"about": data.About,
+		"location": data.Location,
+	})
 	return
 }
