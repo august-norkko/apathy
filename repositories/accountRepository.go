@@ -6,6 +6,7 @@ import (
 	"apathy/models"
 	"apathy/database"
 	"github.com/jinzhu/gorm"
+	"fmt"
 )
 
 const (
@@ -17,9 +18,14 @@ type AccountRepository struct {
 }
 
 func (repository *AccountRepository) StoreAccountInDatabase(r *http.Request, hashedPassword []byte, data *models.Account) (bool, error) {
-	db := database.Mysql()
-	account := &models.Account{ Email: data.Email, Password: string(hashedPassword) }
-	err := db.Create(account).Error
+	fmt.Println(data)
+	account := &models.Account{
+		Username: data.Username,
+		Email: data.Email,
+		Password: string(hashedPassword),
+	}
+
+	err := database.Mysql().Create(account).Error
 	if err != nil {
 		return false, err
 	}
@@ -49,15 +55,30 @@ func (repository *AccountRepository) UpdateAccountInDatabase(r *http.Request, da
 	return true, nil
 }
 
-func (repository *AccountRepository) CheckForExistingEmailInDatabase(r *http.Request, data *models.Account) bool {
+func (repository *AccountRepository) CheckForEmailInUse(r *http.Request, email string) bool {
 	db := database.Mysql()
 	account := &models.Account{}
-	err := db.Table(table).Where("email = ?", data.Email).First(account).Error
+	err := db.Table(table).Where("email = ?", email).First(account).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return false
 	}
 
 	if account.Email != "" {
+		return false
+	}
+
+	return true
+}
+
+func (repository *AccountRepository) CheckForUsernameInUse(r *http.Request, username string) bool {
+	db := database.Mysql()
+	account := &models.Account{}
+	err := db.Table(table).Where("username = ?", username).First(account).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return false
+	}
+
+	if account.Username != "" {
 		return false
 	}
 

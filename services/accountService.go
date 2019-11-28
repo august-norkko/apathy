@@ -6,6 +6,7 @@ import (
 	"apathy/security"
 	"apathy/interfaces"
 	"apathy/models"
+	"fmt"
 )
 
 type AccountService struct {
@@ -18,7 +19,7 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	ok := data.ValidateNewAccount(data.Email, data.Password)
+	ok := data.ValidateNewAccount(data)
 	if !ok {
 		return false, nil
 	}
@@ -28,7 +29,13 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 		return false, err
 	}
 
-	ok = service.CheckForExistingEmailInDatabase(r, data)
+	fmt.Println(data)
+	ok = service.CheckForEmailInUse(r, data.Email)
+	if !ok {
+		return false, nil
+	}
+
+	ok = service.CheckForUsernameInUse(r, data.Username)
 	if !ok {
 		return false, nil
 	}
@@ -51,7 +58,7 @@ func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	ok := data.ValidateNewAccount(data.Email, data.Password)
+	ok := data.ValidateNewAccount(data)
 	if !ok {
 		return "Validation failed", nil
 	}

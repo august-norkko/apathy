@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"regexp"
+	"fmt"
 )
 
 type Account struct {
@@ -14,17 +15,18 @@ type Account struct {
 	About		string  `json:"about"`
 }
 
-func (account *Account) ValidateNewAccount(email, password string) bool {
-	ok, err := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, email)
-	if err != nil {
-		return false
-	}
-
+func (account *Account) ValidateNewAccount(data *Account) bool {
+	ok, _ := regexp.MatchString(`(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)`, data.Email)
 	if !ok {
 		return false
 	}
 
-	if len(password) < 6 {
+	ok, _ = regexp.MatchString(`(^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$)`, data.Username)
+	if !ok {
+		return false
+	}
+	
+	if len(data.Password) < 6 {
 		return false
 	}
 
