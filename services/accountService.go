@@ -13,7 +13,7 @@ type AccountService struct {
 	interfaces.IAccountRepository
 }
 
-func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
+func (service *AccountService) Create(r *http.Request) (bool, error) {
 	data, err := decodeAccountModel(r)
 	if err != nil {
 		return false, err
@@ -40,7 +40,7 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	ok, err = service.StoreAccountInDatabase(r, hash, data)
+	ok, err = service.SaveAccount(r, hash, data)
 	if err != nil {
 		return false, err
 	}
@@ -52,13 +52,13 @@ func (service *AccountService) CreateAccount(r *http.Request) (bool, error) {
 	return true, nil
 }
 
-func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
+func (service *AccountService) Login(r *http.Request) (string, error) {
 	data, err := decodeAccountModel(r)
 	if err != nil {
 		return "", err
 	}
 
-	account, err := service.FetchAccountFromDatabase(r)
+	account, err := service.FindByUsername(r, data)
 	if err != nil {
 		return "", err
 	}
@@ -76,13 +76,13 @@ func (service *AccountService) LoginAccount(r *http.Request) (string, error) {
 	return signedToken, nil
 }
 
-func (service *AccountService) UpdateAccount(r *http.Request) (bool, error) {
+func (service *AccountService) Update(r *http.Request) (bool, error) {
 	updatedAccount, err := decodeAccountModel(r)
 	if err != nil {
 		return false, err
 	}
 
-	ok, err := service.UpdateAccountInDatabase(r, updatedAccount)
+	ok, err := service.UpdateAccount(r, updatedAccount)
 	if !ok {
 		return false, err
 	}
@@ -90,8 +90,8 @@ func (service *AccountService) UpdateAccount(r *http.Request) (bool, error) {
 	return true, nil
 }
 
-func (service *AccountService) FetchAccount(r *http.Request) (*models.Account, error) {
-	account, err := service.FetchAccountFromDatabase(r)
+func (service *AccountService) Fetch(r *http.Request) (*models.Account, error) {
+	account, err := service.FindById(r)
 	if err != nil {
 		return &models.Account{}, err
 	}
@@ -99,13 +99,13 @@ func (service *AccountService) FetchAccount(r *http.Request) (*models.Account, e
 	return account, nil
 }
 
-func (service *AccountService) DeleteAccount(r *http.Request) (bool, error) {
+func (service *AccountService) Delete(r *http.Request) (bool, error) {
 	account, err := decodeAccountModel(r)
 	if err != nil {
 		return false, err
 	}
 
-	ok, err := service.DeleteAccountInDatabase(r, account)
+	ok, err := service.DeleteById(r, account)
 	if !ok {
 		return false, err
 	}

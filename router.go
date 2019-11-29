@@ -21,8 +21,8 @@ func (router *router) InitializeRouter() *mux.Router {
 
 	container := Container()
 	accountController := container.InjectAccountController()
-	r.HandleFunc("/new", accountController.RegisterHandler)
-	r.HandleFunc("/login", accountController.LoginHandler)
+	r.HandleFunc("/new", accountController.RegisterHandler).Methods("POST")
+	r.HandleFunc("/login", accountController.LoginHandler).Methods("POST")
 
 	r.HandleFunc("/account", accountController.DashboardHandler).Methods("GET")
 	r.HandleFunc("/account", accountController.UpdateHandler).Methods("PUT")

@@ -13,7 +13,7 @@ type AccountController struct {
 }
 
 func (controller *AccountController) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	ok, err := controller.CreateAccount(r)
+	ok, err := controller.Create(r)
 	if err != nil {
 		response.Send(w, http.StatusInternalServerError, "Internal Server Error")
 		return
@@ -29,7 +29,7 @@ func (controller *AccountController) RegisterHandler(w http.ResponseWriter, r *h
 }
 
 func (controller *AccountController) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	token, err := controller.LoginAccount(r)
+	token, err := controller.Login(r)
 	if err != nil {
 		response.Send(w, http.StatusBadRequest, "Incorrect credentials")
 		return
@@ -46,7 +46,7 @@ func (controller *AccountController) LoginHandler(w http.ResponseWriter, r *http
 }
 
 func (controller *AccountController) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	ok, err := controller.UpdateAccount(r)
+	ok, err := controller.Update(r)
 	if !ok {
 		response.Send(w, http.StatusBadRequest, fmt.Sprint(err))
 		return
@@ -57,7 +57,7 @@ func (controller *AccountController) UpdateHandler(w http.ResponseWriter, r *htt
 }
 
 func (controller *AccountController) DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := controller.FetchAccount(r)
+	data, err := controller.Fetch(r)
 	if err != nil {
 		response.Send(w, http.StatusBadRequest, "Unable to fetch account")
 		return
@@ -68,12 +68,14 @@ func (controller *AccountController) DashboardHandler(w http.ResponseWriter, r *
 		"email": data.Email,
 		"about": data.About,
 		"location": data.Location,
+		"createdAt": data.CreatedAt,
+		"updatedAt": data.UpdatedAt,
 	})
 	return
 }
 
 func (controller *AccountController) DeleteHandler(w http.ResponseWriter, r *http.Request) {
-	ok, _ := controller.DeleteAccount(r)
+	ok, _ := controller.Delete(r)
 	if !ok {
 		response.Send(w, http.StatusBadRequest, "Unable to delete account")
 		return
