@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"io"
 	"net/http"
 	"apathy/database"
 )
